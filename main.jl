@@ -1,19 +1,20 @@
-using CSV, JSON, Embeddings, Random
+using CSV, JSON, Embeddings, Random, MLMetrics
 using Flux, Flux.Optimise
 include("const.jl")
 include("misc.jl")
 
-const embtable = load_embeddings(GloVe, "./glove/glove.840B.300d.txt") # or load_embeddings(FastText_Text) or ...
+path = "./glove/glove.840B.300d.txt"
+# path = "/big/f/fuchsp/posat-adapted/glove/glove.840B.300d.txt"
+
+const embtable = load_embeddings(GloVe, path) # or load_embeddings(FastText_Text) or ...
 const get_word_index = Dict(word=>ii for (ii,word) in enumerate(embtable.vocab))
+
 labels = collect(keys(LABEL_TO_ID))
 
-m = Chain(
-    x -> prepare_batch(x, embtable, get_word_index),
-    LSTM(300, 200),
-    # Dense(300, 200),
-    Dense(200, length(labels)),
-    softmax
-)
+
+use_gpu = true # helper to easily switch between gpu/cpu
+@info("Use Gpu?", use_gpu)
+todevice(x) = use_gpu ? gpu(x) : x
 
 # read datasets
 X_train, y_train = load_data("train.json")

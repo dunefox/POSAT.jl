@@ -28,6 +28,7 @@ function get_embedding(word, embtable, w_ind)
 end
 
 function preprocess_batch(batch)
+    # TODO preprocess all data as to not waste performance
     max_length = maximum(length.([el["token"] for el in batch]))
     result = []
     for el in batch
@@ -42,6 +43,9 @@ function preprocess_batch(batch)
 end
 
 # Negative Log Likelihood Cost
+# Instance loss
+# loss(xᵢ, yᵢ) = -log(sum(model(xᵢ) .* Flux.onehot(yᵢ, labels)))
+# Batch loss
 function loss(x, y)
     nll = 0.0
 
